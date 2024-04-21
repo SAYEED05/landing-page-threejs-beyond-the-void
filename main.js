@@ -6,7 +6,7 @@ import {
   createPlaneMesh,
   createSpotlight,
   createStatsElement,
-} from "./helpers/creators";
+} from "/helpers/creators";
 import gsap from "gsap";
 
 const scene = new THREE.Scene();

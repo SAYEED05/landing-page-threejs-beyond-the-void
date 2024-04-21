@@ -52,7 +52,7 @@ const params = {
 };
 
 const exrLoader = new EXRLoader();
-const envMap = await exrLoader.loadAsync("./beach.exr");
+const envMap = await exrLoader.loadAsync("/beach.exr");
 envMap.mapping = THREE.EquirectangularReflectionMapping;
 
 let skybox = new GroundedSkybox(envMap, params.height, params.radius);
