@@ -9,6 +9,18 @@ import {
 } from "/helpers/creators";
 import gsap from "gsap";
 
+const loadingText = document.getElementById("loading_text");
+const startButton = document.getElementById("start_button");
+const title = document.getElementById("title");
+const releaseDate = document.getElementById("release_date");
+const helperText = document.getElementById("helperText");
+const preOrderButton = document.getElementById("pre_order");
+
+const loadingManager = new THREE.LoadingManager(() => {
+  loadingText.style.display = "none";
+  startButton.style.display = "block";
+});
+
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x000000);
 
@@ -33,6 +45,7 @@ scene.add(light);
 
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
+controls.enabled = false;
 
 controls.enableZoom = true;
 controls.enableDamping = true;
@@ -58,7 +71,7 @@ frontWall.position.y = 2.5;
 
 camera.position.set(1, 1.5, 8);
 
-const stats = createStatsElement();
+// const stats = createStatsElement();
 
 const spotLight = createSpotlight(
   {
@@ -73,7 +86,7 @@ const spotLight = createSpotlight(
 spotLight.visible = false;
 scene.add(spotLight);
 
-const loader = new GLTFLoader();
+const loader = new GLTFLoader(loadingManager);
 
 let humanModel; // Define the humanModel variable outside the scope of the loader
 
@@ -101,9 +114,7 @@ function loadModel() {
         scene.add(human.scene);
         resolve(humanModel); // Resolve the promise with the loaded model
       },
-      function (progress) {
-        console.log("loading");
-      },
+      function (progress) {},
       function (error) {
         console.error(error);
         reject(error); // Reject the promise if an error occurs
@@ -121,9 +132,7 @@ loader.load(
     blackhole.scene.position.set(0, 9, 50);
     scene.add(blackhole.scene);
   },
-  function (progress) {
-    console.log("loading");
-  },
+  function (progress) {},
   function (error) {
     console.error(error);
   }
@@ -155,10 +164,6 @@ audioLoader.load("sounds/bg.mp3", function (buffer) {
 });
 // addEventListener("mousedown", () => sound.play());
 
-const startButton = document.getElementById("start_button");
-const title = document.getElementById("title");
-const releaseDate = document.getElementById("release_date");
-const helperText = document.getElementById("helperText");
 startButton.addEventListener("click", async () => {
   gsap.to(helperText, { duration: 0.5, opacity: 0 });
   sound.play();
@@ -195,14 +200,21 @@ startButton.addEventListener("click", async () => {
       .to(releaseDate, {
         duration: 1,
         opacity: 1,
+      })
+      .to(preOrderButton, {
+        display: "block",
+        duration: 0.5,
+        delay: 7.5, //to sync with the beat
+        onComplete: () => {
+          controls.enabled = true;
+        },
       });
   }
 });
 //Main Loop
 
 function animate() {
-  console.log(camera.position);
-  stats.update();
+  // stats.update();
   controls.update();
   renderer.render(scene, camera);
   requestAnimationFrame(animate);

@@ -74,9 +74,7 @@ loader.load(
 
     scene.add(gltf.scene);
   },
-  function (progress) {
-    console.log("loading");
-  },
+  function (progress) {},
   function (error) {
     console.error(error);
   }
