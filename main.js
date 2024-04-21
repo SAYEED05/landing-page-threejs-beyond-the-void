@@ -125,12 +125,18 @@ function loadModel() {
 
 loadModel();
 
+let blackholeMixer;
+let clock;
+clock = new THREE.Clock();
+
 loader.load(
   "/models/blackhole/scene.gltf",
   function (blackhole) {
     blackhole.scene.scale.set(10, 10, 10);
     blackhole.scene.position.set(0, 9, 50);
     scene.add(blackhole.scene);
+    blackholeMixer = new THREE.AnimationMixer(blackhole.scene);
+    blackholeMixer.clipAction(blackhole.animations[0]).play();
   },
   function (progress) {},
   function (error) {
@@ -212,10 +218,11 @@ startButton.addEventListener("click", async () => {
   }
 });
 //Main Loop
-
 function animate() {
   // stats.update();
   controls.update();
+  var delta = clock.getDelta();
+  if (blackholeMixer) blackholeMixer.update(delta);
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
 }
