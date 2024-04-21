@@ -217,6 +217,15 @@ startButton.addEventListener("click", async () => {
       });
   }
 });
+
+preOrderButton.addEventListener("click", async () => {
+  gsap.to(camera.position, {
+    duration: 3,
+    x: -0.1,
+    y: -20,
+    z: -100,
+  });
+});
 //Main Loop
 function animate() {
   // stats.update();
