@@ -1,14 +1,14 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import Stats from "three/addons/libs/stats.module.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
-import { EXRLoader } from "three/addons/loaders/EXRLoader.js";
 import {
+  convertToParticle,
   createPlaneMesh,
   createSpotlight,
   createStatsElement,
 } from "./helpers/creators";
 import gsap from "gsap";
+
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x000000);
 
@@ -51,7 +51,7 @@ const frontWall = createPlaneMesh(10, 5, {
 });
 frontWall.position.z = 25;
 frontWall.position.y = 2.5;
-scene.add(frontWall);
+// scene.add(frontWall);
 
 camera.position.set(1, 1, -10);
 
@@ -60,46 +60,37 @@ const stats = createStatsElement();
 const spotLight = createSpotlight(
   {
     color: 0xffffff,
-    intensity: 200,
+    intensity: 0,
     distance: undefined,
     angle: 0.2,
     penumbra: 0.5,
   },
   { x: 0, y: 7, z: 0 }
 );
+spotLight.visible = false;
 scene.add(spotLight);
-// const spotLighthelper = new THREE.CameraHelper(spotLight.shadow.camera);
-// scene.add(spotLighthelper);
-
-// const directionalLight = new THREE.DirectionalLight(0xffffff, 0.2);
-// directionalLight.castShadow = true;
-// directionalLight.position.x = 0;
-// directionalLight.position.y = 4;
-// directionalLight.position.z = 8;
-// directionalLight.target.position.set(0, 0, 0);
-// scene.add(directionalLight);
-
-// const helper = new THREE.CameraHelper(directionalLight.shadow.camera);
-// scene.add(helper);
 
 const loader = new GLTFLoader();
 
-loader.load(
+let humanModel = loader.load(
   "/models/cooper/scene.gltf",
-  function (gltf) {
-    console.log(gltf, "gltf");
-    gltf.scene.scale.set(1, 1, 1);
-    gltf.scene.position.y = 1.25;
-    gltf.scene.traverse(function (node) {
+  function (human) {
+    console.log(human, "human");
+    human.scene.scale.set(1, 1, 1);
+    // human.scene.position.y = 1.25;
+    human.scene.traverse(function (node) {
       if (node.name === "Ground_1") {
         node.visible = false;
       }
       if (node.isMesh) {
-        console.log(node, "node");
         node.castShadow = true;
+        //use points instead of mesh
+        // node.visible = false;
+        // convertToParticle(scene, 3000, node);
       }
     });
-    scene.add(gltf.scene);
+
+    scene.add(human.scene);
   },
   function (progress) {
     console.log("loading");
@@ -131,12 +122,29 @@ audioLoader.load("sounds/bg2.mp3", function (buffer) {
   sound.setBuffer(buffer);
   sound.setLoop(true);
   sound.setVolume(0.5);
+  sound.offset = 0.7;
 });
 // addEventListener("mousedown", () => sound.play());
 
+const startButton = document.getElementById("start_button");
+startButton.addEventListener("click", () => {
+  startButton.style.display = "none";
+  // sound.play();
+  // gsap.to(humanModel.position, { duration: 5, delay: 1, y: 1.25 });
+  spotLight.visible = true;
+  gsap.to(camera.position, { duration: 10, delay: 1, x: 0.5, y: 4.5, z: -7 });
+  gsap.to(spotLight, {
+    duration: 10,
+    delay: 1,
+    intensity: 200,
+    angle: 0.2,
+    penumbra: 0.5,
+  });
+});
 //Main Loop
 
 function animate() {
+  console.log(camera.position);
   stats.update();
   controls.update();
   renderer.render(scene, camera);

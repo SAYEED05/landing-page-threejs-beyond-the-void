@@ -2,4 +2,35 @@ body {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-family: "Electrolize", sans-serif !important;
+}
+
+.ui {
+  font-family: "Electrolize", sans-serif;
+  position: absolute;
+}
+
+#start_button {
+  bottom: 25vh;
+  right: 50%;
+  transform: translate(50%, 50%);
+  height: 50px;
+  width: 100px;
+  border: 1px solid #ffffff;
+  background-color: transparent;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 250ms;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 4px;
+}
+
+#start_button:hover {
+  background-color: #ffffff;
+  color: #000000;
+  border: 1px solid #000000;
+  letter-spacing: 8px;
+  width: 150px;
+  transition: all 250ms;
 }
