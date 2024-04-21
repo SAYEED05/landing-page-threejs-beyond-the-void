@@ -19,13 +19,16 @@ const camera = new THREE.PerspectiveCamera(
   1000
 );
 
-const renderer = new THREE.WebGLRenderer({ antialias: true });
+const renderer = new THREE.WebGLRenderer({
+  antialias: true,
+  logarithmicDepthBuffer: true,
+});
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFShadowMap;
 document.body.appendChild(renderer.domElement);
 
-const light = new THREE.AmbientLight(0x121112, 50); // soft white light
+const light = new THREE.AmbientLight(0x121112, 5); // soft white light
 scene.add(light);
 
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -72,25 +75,51 @@ scene.add(spotLight);
 
 const loader = new GLTFLoader();
 
-let humanModel = loader.load(
-  "/models/cooper/scene.gltf",
-  function (human) {
-    console.log(human, "human");
-    human.scene.scale.set(1, 1, 1);
-    // human.scene.position.y = 1.25;
-    human.scene.traverse(function (node) {
-      if (node.name === "Ground_1") {
-        node.visible = false;
-      }
-      if (node.isMesh) {
-        node.castShadow = true;
-        //use points instead of mesh
-        // node.visible = false;
-        // convertToParticle(scene, 3000, node);
-      }
-    });
+let humanModel; // Define the humanModel variable outside the scope of the loader
 
-    scene.add(human.scene);
+// Create a function to load the model and return a promise
+function loadModel() {
+  return new Promise((resolve, reject) => {
+    loader.load(
+      "/models/cooper/scene.gltf",
+      function (human) {
+        // Your loading logic here
+        humanModel = human.scene; // Assign the loaded scene to the humanModel variable
+        human.scene.scale.set(1, 1, 1);
+        // human.scene.position.y = 1.25;
+        human.scene.traverse(function (node) {
+          if (node.name === "Ground_1") {
+            node.visible = false;
+          }
+          if (node.isMesh) {
+            node.castShadow = true;
+            //use points instead of mesh
+            // node.visible = false;
+            // convertToParticle(scene, 3000, node);
+          }
+        });
+        scene.add(human.scene);
+        resolve(humanModel); // Resolve the promise with the loaded model
+      },
+      function (progress) {
+        console.log("loading");
+      },
+      function (error) {
+        console.error(error);
+        reject(error); // Reject the promise if an error occurs
+      }
+    );
+  });
+}
+
+loadModel();
+
+loader.load(
+  "/models/blackhole/scene.gltf",
+  function (blackhole) {
+    blackhole.scene.scale.set(10, 10, 10);
+    blackhole.scene.position.set(0, 9, 50);
+    scene.add(blackhole.scene);
   },
   function (progress) {
     console.log("loading");
@@ -127,12 +156,11 @@ audioLoader.load("sounds/bg2.mp3", function (buffer) {
 // addEventListener("mousedown", () => sound.play());
 
 const startButton = document.getElementById("start_button");
-startButton.addEventListener("click", () => {
-  startButton.style.display = "none";
+startButton.addEventListener("click", async () => {
   // sound.play();
-  // gsap.to(humanModel.position, { duration: 5, delay: 1, y: 1.25 });
+  startButton.style.display = "none";
   spotLight.visible = true;
-  gsap.to(camera.position, { duration: 10, delay: 1, x: 0.5, y: 4.5, z: -7 });
+  gsap.to(camera.position, { duration: 10, delay: 0.5, x: 1, y: 6, z: -7 });
   gsap.to(spotLight, {
     duration: 10,
     delay: 1,
@@ -140,6 +168,19 @@ startButton.addEventListener("click", () => {
     angle: 0.2,
     penumbra: 0.5,
   });
+  if (humanModel) {
+    const tl = gsap.timeline();
+    tl.to(humanModel.position, { duration: 5, delay: 1, y: 1.25 }).to(
+      humanModel.position,
+      {
+        duration: 2,
+        y: 1.15,
+        yoyo: true,
+        repeat: -1,
+        ease: "power1.inOut",
+      }
+    );
+  }
 });
 //Main Loop
 
