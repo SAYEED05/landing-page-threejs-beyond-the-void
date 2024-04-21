@@ -56,7 +56,7 @@ frontWall.position.z = 25;
 frontWall.position.y = 2.5;
 // scene.add(frontWall);
 
-camera.position.set(1, 1, -10);
+camera.position.set(1, 1.5, 8);
 
 const stats = createStatsElement();
 
@@ -156,11 +156,14 @@ audioLoader.load("sounds/bg2.mp3", function (buffer) {
 // addEventListener("mousedown", () => sound.play());
 
 const startButton = document.getElementById("start_button");
+const title = document.getElementById("title");
+const releaseDate = document.getElementById("release_date");
+const helperText = document.getElementById("helperText");
 startButton.addEventListener("click", async () => {
-  // sound.play();
+  gsap.to(helperText, { duration: 0.5, opacity: 0 });
+  sound.play();
   startButton.style.display = "none";
   spotLight.visible = true;
-  gsap.to(camera.position, { duration: 10, delay: 0.5, x: 1, y: 6, z: -7 });
   gsap.to(spotLight, {
     duration: 10,
     delay: 1,
@@ -170,16 +173,29 @@ startButton.addEventListener("click", async () => {
   });
   if (humanModel) {
     const tl = gsap.timeline();
-    tl.to(humanModel.position, { duration: 5, delay: 1, y: 1.25 }).to(
-      humanModel.position,
-      {
+    tl.to(humanModel.position, { duration: 5, delay: 1, y: 1.25 })
+      .to(humanModel.position, {
         duration: 2,
         y: 1.15,
         yoyo: true,
         repeat: -1,
         ease: "power1.inOut",
-      }
-    );
+      })
+
+      .to(camera.position, {
+        duration: 10,
+        x: -0.1,
+        y: 1,
+        z: -9,
+      })
+      .to(title, {
+        duration: 1,
+        opacity: 1,
+      })
+      .to(releaseDate, {
+        duration: 1,
+        opacity: 1,
+      });
   }
 });
 //Main Loop
